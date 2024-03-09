@@ -1,7 +1,10 @@
 package jtree;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -10,6 +13,8 @@ public class Frame extends javax.swing.JFrame {
 
     private DefaultTreeModel modelo;
     private DefaultMutableTreeNode NodoSeleccionado;
+    private DefaultMutableTreeNode NodoCopiado;
+
     private File root;
 
     public Frame() {
@@ -18,18 +23,19 @@ public class Frame extends javax.swing.JFrame {
         setLocationRelativeTo(null);
 
         root = new File("root");
-        
-        if (!root.exists()){
+
+        if (!root.exists()) {
             root.mkdirs();
         }
 
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(root.getName());
-        
         buildTree(root, rootNode);
 
-        modelo = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
+        modelo = new DefaultTreeModel(rootNode);
         Jtree.setModel(modelo);
 
+        AñadirNodoArchivo.addActionListener(e -> AñadirNodoArchivoActionPerformed(e));
+        AñadirNodoFolder.addActionListener(e -> AñadirNodoFolderActionPerformed(e));
 
     }
 
@@ -48,8 +54,8 @@ public class Frame extends javax.swing.JFrame {
         Jtree = new javax.swing.JTree();
         OrdenarNodos = new javax.swing.JComboBox<>();
         jLabel2 = new javax.swing.JLabel();
-        jButton4 = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
+        CopiarNodo = new javax.swing.JButton();
+        PegarNodo = new javax.swing.JButton();
         jButton8 = new javax.swing.JButton();
         ModificarNodoBTN = new javax.swing.JButton();
 
@@ -85,6 +91,11 @@ public class Frame extends javax.swing.JFrame {
         });
 
         OrganizarNodo.setText("Organizar Nodo");
+        OrganizarNodo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                OrganizarNodoActionPerformed(evt);
+            }
+        });
 
         BorrarNodoBTN.setText("Borrar nodo");
         BorrarNodoBTN.addActionListener(new java.awt.event.ActionListener() {
@@ -148,16 +159,26 @@ public class Frame extends javax.swing.JFrame {
         jLabel2.setForeground(new java.awt.Color(0, 0, 0));
         jLabel2.setText("Ordenar por:");
 
-        jButton4.setText("Copiar nodo seleccionado");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
+        CopiarNodo.setText("Copiar nodo seleccionado");
+        CopiarNodo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
+                CopiarNodoActionPerformed(evt);
             }
         });
 
-        jButton5.setText("Pegar nodo seleccionado");
+        PegarNodo.setText("Pegar nodo seleccionado");
+        PegarNodo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                PegarNodoActionPerformed(evt);
+            }
+        });
 
         jButton8.setText("Registrar Datos en nodo seleccionado");
+        jButton8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton8ActionPerformed(evt);
+            }
+        });
 
         ModificarNodoBTN.setText("Cambiar nombre en nodo seleccionado");
         ModificarNodoBTN.addActionListener(new java.awt.event.ActionListener() {
@@ -184,8 +205,8 @@ public class Frame extends javax.swing.JFrame {
                         .addComponent(OrganizarNodo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(BorrarNodoBTN, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(OrdenarNodos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 225, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jButton4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(CopiarNodo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(PegarNodo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton8, javax.swing.GroupLayout.Alignment.TRAILING)
                         .addComponent(ModificarNodoBTN, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(AñadirNodoFolder, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
@@ -220,9 +241,9 @@ public class Frame extends javax.swing.JFrame {
                         .addGap(4, 4, 4)
                         .addComponent(OrdenarNodos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(27, 27, 27)
-                        .addComponent(jButton4)
+                        .addComponent(CopiarNodo)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton5)
+                        .addComponent(PegarNodo)
                         .addGap(40, 40, 40)
                         .addComponent(jButton8)
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
@@ -254,7 +275,7 @@ public class Frame extends javax.swing.JFrame {
             }
         }
     }
-    
+
     private File srchDirectory(String name, File root) {
         if (name.equals("root")) {
             return root;
@@ -279,38 +300,50 @@ public class Frame extends javax.swing.JFrame {
     }
 
     private void AñadirNodoArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AñadirNodoArchivoActionPerformed
-        AñadirNodoArchivo.addActionListener(e -> {
-            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) Jtree.getLastSelectedPathComponent();
-            if (selectedNode != null) {
-                String fileName = NombreNodo.getText();
-                if (fileName != null && !fileName.trim().isEmpty()) {
-                    File selectedFile = srchDirectory((String) selectedNode.getUserObject(), root);
-                    if (selectedFile != null) {
-                        File newFile = new File(selectedFile, fileName);
-                        try {
-                            if (newFile.createNewFile()) {
-                                DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newFile.getName());
-                                selectedNode.add(newNode);
-                                ((DefaultTreeModel) Jtree.getModel()).reload(selectedNode);
-                            } else {
-                                JOptionPane.showMessageDialog(Frame.this, "No se pudo crear el archivo", "Error", JOptionPane.ERROR_MESSAGE);
-                            }
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(Frame.this, "No se pudo crear el archivo", "Error", JOptionPane.ERROR_MESSAGE);
-                    }
+    DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) Jtree.getLastSelectedPathComponent();
+    if (selectedNode != null) {
+        String fileName = NombreNodo.getText();
+        if (!fileName.isEmpty()) {
+            File selectedFile = srchDirectory((String) selectedNode.getUserObject(), root);
+            File newFile = new File(selectedFile, fileName + ".txt");
+
+            File parentDirectory = newFile.getParentFile();
+            if (!parentDirectory.exists()) {
+                if (!parentDirectory.mkdirs()) {
+                    JOptionPane.showMessageDialog(Frame.this, "Error: No se pudo crear el directorio", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
             }
-        });
+
+            try {
+                if (!newFile.exists()) {
+                    if (newFile.createNewFile()) {
+                        DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newFile.getName());
+                        selectedNode.add(newNode);
+                        ((DefaultTreeModel) Jtree.getModel()).reload(selectedNode);
+                    }
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(Frame.this, "Error: No se pudo crear el archivo", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(Frame.this, "Error: Nombre de archivo inválido", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
     }//GEN-LAST:event_AñadirNodoArchivoActionPerformed
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton4ActionPerformed
+    private void CopiarNodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CopiarNodoActionPerformed
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) Jtree.getLastSelectedPathComponent();
+        if (selectedNode != null) {
+            NodoCopiado = new DefaultMutableTreeNode(selectedNode.getUserObject());
+            JOptionPane.showMessageDialog(Frame.this, "Nodo copiado", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(Frame.this, "Seleccione un nodo para copiar", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_CopiarNodoActionPerformed
 
-    
+
     private void OrdenarNodosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OrdenarNodosActionPerformed
 
         String itemSeleccionado = (String) OrdenarNodos.getSelectedItem();
@@ -325,12 +358,12 @@ public class Frame extends javax.swing.JFrame {
         }
 
         if (itemSeleccionado.equals("Fecha")) {
-            funcion.sortAlfabeto(treeModel);
+            funcion.sortFecha(treeModel);
             Jtree.updateUI();
         }
 
         if (itemSeleccionado.equals("Tipo")) {
-            funcion.sortAlfabeto(treeModel);
+            funcion.sortTipo(treeModel);
             Jtree.updateUI();
         }
 
@@ -341,10 +374,37 @@ public class Frame extends javax.swing.JFrame {
         if (NodoSeleccionado != null && modelo != null) {
             DefaultMutableTreeNode parent = (DefaultMutableTreeNode) NodoSeleccionado.getParent();
             if (parent != null) {
+                File selectedFile = srchDirectory((String) NodoSeleccionado.getUserObject(), root);
+
+                if (selectedFile != null) {
+                    if (selectedFile.isDirectory()) {
+                        deleteDirectory(selectedFile);
+                    } else {
+                        if (!selectedFile.delete()) {
+                            JOptionPane.showMessageDialog(Frame.this, "Error: No se pudo borrar el archivo", "Error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                    }
+                }
+
                 modelo.removeNodeFromParent(NodoSeleccionado);
             }
         }
     }//GEN-LAST:event_BorrarNodoBTNActionPerformed
+    private static void deleteDirectory(File directory) {
+        if (directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    deleteDirectory(file);
+                }
+            }
+        }
+        if (!directory.delete()) {
+            JOptionPane.showMessageDialog(null, "Error: No se pudo borrar el directorio", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
 
     private void JtreeValueChanged(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_JtreeValueChanged
         NodoSeleccionado = (DefaultMutableTreeNode) Jtree.getLastSelectedPathComponent();
@@ -354,10 +414,23 @@ public class Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_JtreeValueChanged
 
     private void ModificarNodoBTNActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ModificarNodoBTNActionPerformed
-        if (NodoSeleccionado != null) {
-            NodoSeleccionado.setUserObject(NombreNodo.getText());
-            modelo.nodeChanged(NodoSeleccionado);
+     NodoSeleccionado = (DefaultMutableTreeNode) Jtree.getLastSelectedPathComponent();
+
+    if (NodoSeleccionado != null) {
+        String nuevoNombre = NombreNodo.getText();
+        if (!nuevoNombre.isEmpty()) {
+                File selectedFile = srchDirectory((String) NodoSeleccionado.getUserObject(), root);
+                if (selectedFile != null) {
+                    File nuevoArchivo = new File(selectedFile.getParentFile(), nuevoNombre);
+                    if (selectedFile.renameTo(nuevoArchivo)) {
+                        NodoSeleccionado.setUserObject(nuevoNombre);
+                        modelo.nodeChanged(NodoSeleccionado);
+                    } else {
+                        JOptionPane.showMessageDialog(Frame.this, "Error: No se pudo cambiar el nombre", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
         }
+    }
     }//GEN-LAST:event_ModificarNodoBTNActionPerformed
 
     private void NombreNodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NombreNodoActionPerformed
@@ -373,29 +446,140 @@ public class Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_JtreeMouseClicked
 
     private void AñadirNodoFolderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AñadirNodoFolderActionPerformed
-    AñadirNodoFolder.addActionListener(e -> {
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) Jtree.getLastSelectedPathComponent();
         if (selectedNode != null) {
             String folderName = NombreNodo.getText();
-            if (folderName != null && !folderName.trim().isEmpty()) {
+            if (!folderName.isEmpty()) {
                 File selectedFile = srchDirectory((String) selectedNode.getUserObject(), root);
                 File newFolder = new File(selectedFile, folderName);
-                if (!newFolder.exists()) {
-                    if (newFolder.mkdir()) {
-                        DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newFolder.getName());
-                        selectedNode.add(newNode);
-                        ((DefaultTreeModel) Jtree.getModel()).reload(selectedNode);
-                    } else {
-                        JOptionPane.showMessageDialog(Frame.this, "No se pudo crear la carpeta", "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(Frame.this, "La carpeta ya existe", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                if (!newFolder.exists() && newFolder.mkdirs()) {
+                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newFolder.getName());
+                    selectedNode.add(newNode);
+                    ((DefaultTreeModel) Jtree.getModel()).reload(selectedNode);
                 }
             }
         }
-    });
     }//GEN-LAST:event_AñadirNodoFolderActionPerformed
-    
+
+    private void PegarNodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PegarNodoActionPerformed
+
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) Jtree.getLastSelectedPathComponent();
+        if (selectedNode != null && NodoCopiado != null) {
+            selectedNode.add(NodoCopiado);
+            ((DefaultTreeModel) Jtree.getModel()).reload(selectedNode);
+            JOptionPane.showMessageDialog(Frame.this, "Nodo pegado", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(Frame.this, "Seleccione un nodo y copie antes de pegar", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        }
+
+    }//GEN-LAST:event_PegarNodoActionPerformed
+
+    private void organize(File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile()) {
+                    String fileType = getFileType(file);
+                    File destinationFolder = getDestinationFolder(folder, fileType);
+                    File newFile = new File(destinationFolder, file.getName());
+
+                    if (!destinationFolder.exists()) {
+                        destinationFolder.mkdirs();
+                    }
+
+                    if (file.renameTo(newFile)) {
+                        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) NodoSeleccionado.getParent();
+                        parentNode.remove(NodoSeleccionado);
+                        ((DefaultTreeModel) Jtree.getModel()).reload(parentNode);
+                    } else {
+                        JOptionPane.showMessageDialog(Frame.this, "Error al organizar archivos", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        }
+    }
+
+    private String getFileType(File file) {
+        return "Documentos";
+    }
+
+    private File getDestinationFolder(File folder, String fileType) {
+        return new File(folder, fileType);
+    }
+
+    private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
+        DefaultMutableTreeNode nodoSeleccionado = (DefaultMutableTreeNode) Jtree.getLastSelectedPathComponent();
+        File selectedFile = srchDirectory((String) nodoSeleccionado.getUserObject(), root);
+        System.out.println("llega a donde no es null");
+
+        if (selectedFile != null) {
+            System.out.println(selectedFile.isDirectory());
+
+            if (!selectedFile.isDirectory()) {
+                System.out.println("llega a donde no es directory");
+                String inputData = JOptionPane.showInputDialog(Frame.this, "Ingrese datos de texto:");
+
+                if (inputData != null) {
+                    try (PrintWriter writer = new PrintWriter(selectedFile)) {
+                        writer.write(inputData);
+                        JOptionPane.showMessageDialog(Frame.this, "Datos registrados con éxito", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        JOptionPane.showMessageDialog(Frame.this, "Error al registrar datos", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(Frame.this, "Seleccione un archivo para registrar datos", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(Frame.this, "No se encontró el nodo seleccionado", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_jButton8ActionPerformed
+
+    private void OrganizarNodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OrganizarNodoActionPerformed
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) Jtree.getLastSelectedPathComponent();
+        if (selectedNode != null) {
+            File selectedFolder = srchDirectory((String) selectedNode.getUserObject(), root);
+            if (selectedFolder != null && selectedFolder.isDirectory()) {
+                organize(selectedFolder);
+                ((DefaultTreeModel) Jtree.getModel()).reload(selectedNode);
+                JOptionPane.showMessageDialog(Frame.this, "Archivos organizados con éxito", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(Frame.this, "Seleccione una carpeta para organizar archivos", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            }
+        }    }//GEN-LAST:event_OrganizarNodoActionPerformed
+
+    private static void copyDirectory(File source, File destination) {
+        if (!destination.exists()) {
+            destination.mkdir();
+        }
+
+        File[] files = source.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                File newFile = new File(destination, file.getName());
+                if (file.isDirectory()) {
+                    copyDirectory(file, newFile);
+                } else {
+                    copyFile(file, newFile);
+                }
+            }
+        }
+    }
+
+    private static void copyFile(File source, File destination) {
+        try (FileInputStream fis = new FileInputStream(source); FileOutputStream fos = new FileOutputStream(destination)) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = fis.read(buffer)) > 0) {
+                fos.write(buffer, 0, length);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -432,13 +616,13 @@ public class Frame extends javax.swing.JFrame {
     private javax.swing.JButton AñadirNodoArchivo;
     private javax.swing.JButton AñadirNodoFolder;
     private javax.swing.JButton BorrarNodoBTN;
+    private javax.swing.JButton CopiarNodo;
     private javax.swing.JTree Jtree;
     private javax.swing.JButton ModificarNodoBTN;
     private javax.swing.JTextField NombreNodo;
     private javax.swing.JComboBox<String> OrdenarNodos;
     private javax.swing.JButton OrganizarNodo;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
+    private javax.swing.JButton PegarNodo;
     private javax.swing.JButton jButton8;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

@@ -58,8 +58,8 @@
                           <Component id="OrganizarNodo" alignment="1" max="32767" attributes="0"/>
                           <Component id="BorrarNodoBTN" alignment="0" max="32767" attributes="0"/>
                           <Component id="OrdenarNodos" alignment="1" min="-2" pref="225" max="-2" attributes="0"/>
-                          <Component id="jButton4" alignment="1" max="32767" attributes="0"/>
-                          <Component id="jButton5" alignment="1" max="32767" attributes="0"/>
+                          <Component id="CopiarNodo" alignment="1" max="32767" attributes="0"/>
+                          <Component id="PegarNodo" alignment="1" max="32767" attributes="0"/>
                           <Component id="jButton8" alignment="1" min="-2" max="-2" attributes="0"/>
                           <Component id="ModificarNodoBTN" alignment="1" max="32767" attributes="0"/>
                           <Component id="AñadirNodoFolder" alignment="1" max="32767" attributes="0"/>
@@ -99,9 +99,9 @@
                           <EmptySpace min="-2" pref="4" max="-2" attributes="0"/>
                           <Component id="OrdenarNodos" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
-                          <Component id="jButton4" min="-2" max="-2" attributes="0"/>
+                          <Component id="CopiarNodo" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jButton5" min="-2" max="-2" attributes="0"/>
+                          <Component id="PegarNodo" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
                           <Component id="jButton8" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
@@ -157,6 +157,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Organizar Nodo"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="OrganizarNodoActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="BorrarNodoBTN">
           <Properties>
@@ -225,23 +228,29 @@
             <Property name="text" type="java.lang.String" value="Ordenar por:"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="jButton4">
+        <Component class="javax.swing.JButton" name="CopiarNodo">
           <Properties>
             <Property name="text" type="java.lang.String" value="Copiar nodo seleccionado"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton4ActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="CopiarNodoActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="jButton5">
+        <Component class="javax.swing.JButton" name="PegarNodo">
           <Properties>
             <Property name="text" type="java.lang.String" value="Pegar nodo seleccionado"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="PegarNodoActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="jButton8">
           <Properties>
             <Property name="text" type="java.lang.String" value="Registrar Datos en nodo seleccionado"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton8ActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="ModificarNodoBTN">
           <Properties>
