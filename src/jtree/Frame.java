@@ -300,37 +300,28 @@ public class Frame extends javax.swing.JFrame {
     }
 
     private void AñadirNodoArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AñadirNodoArchivoActionPerformed
-    DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) Jtree.getLastSelectedPathComponent();
-    if (selectedNode != null) {
-        String fileName = NombreNodo.getText();
-        if (!fileName.isEmpty()) {
-            File selectedFile = srchDirectory((String) selectedNode.getUserObject(), root);
-            File newFile = new File(selectedFile, fileName + ".txt");
-
-            File parentDirectory = newFile.getParentFile();
-            if (!parentDirectory.exists()) {
-                if (!parentDirectory.mkdirs()) {
-                    JOptionPane.showMessageDialog(Frame.this, "Error: No se pudo crear el directorio", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-            }
-
-            try {
-                if (!newFile.exists()) {
-                    if (newFile.createNewFile()) {
-                        DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newFile.getName());
-                        selectedNode.add(newNode);
-                        ((DefaultTreeModel) Jtree.getModel()).reload(selectedNode);
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) Jtree.getLastSelectedPathComponent();
+        if (selectedNode != null) {
+            String fileName = NombreNodo.getText();
+            if (!fileName.isEmpty()) {
+                File selectedFile = srchDirectory((String) selectedNode.getUserObject(), root);
+                File newFile = new File(selectedFile, fileName + ".txt");
+                try {
+                    if (!newFile.exists()) {
+                        if (newFile.createNewFile()) {
+                            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newFile.getName());
+                            selectedNode.add(newNode);
+                            ((DefaultTreeModel) Jtree.getModel()).reload(selectedNode);
+                        }
                     }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(Frame.this, "Error: No se pudo crear el archivo", "Error", JOptionPane.ERROR_MESSAGE);
                 }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(Frame.this, "Error: No se pudo crear el archivo", "Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(Frame.this, "Error: Nombre de archivo inválido", "Error", JOptionPane.ERROR_MESSAGE);
             }
-        } else {
-            JOptionPane.showMessageDialog(Frame.this, "Error: Nombre de archivo inválido", "Error", JOptionPane.ERROR_MESSAGE);
         }
-    }
     }//GEN-LAST:event_AñadirNodoArchivoActionPerformed
 
     private void CopiarNodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CopiarNodoActionPerformed
@@ -414,23 +405,27 @@ public class Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_JtreeValueChanged
 
     private void ModificarNodoBTNActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ModificarNodoBTNActionPerformed
-     NodoSeleccionado = (DefaultMutableTreeNode) Jtree.getLastSelectedPathComponent();
+        NodoSeleccionado = (DefaultMutableTreeNode) Jtree.getLastSelectedPathComponent();
 
-    if (NodoSeleccionado != null) {
-        String nuevoNombre = NombreNodo.getText();
-        if (!nuevoNombre.isEmpty()) {
-                File selectedFile = srchDirectory((String) NodoSeleccionado.getUserObject(), root);
-                if (selectedFile != null) {
-                    File nuevoArchivo = new File(selectedFile.getParentFile(), nuevoNombre);
-                    if (selectedFile.renameTo(nuevoArchivo)) {
-                        NodoSeleccionado.setUserObject(nuevoNombre);
-                        modelo.nodeChanged(NodoSeleccionado);
-                    } else {
-                        JOptionPane.showMessageDialog(Frame.this, "Error: No se pudo cambiar el nombre", "Error", JOptionPane.ERROR_MESSAGE);
+        if (NodoSeleccionado != null) {
+            String nuevoNombre = NombreNodo.getText();
+            if (!nuevoNombre.isEmpty()) {
+                DefaultMutableTreeNode parent = (DefaultMutableTreeNode) NodoSeleccionado.getParent();
+                if (parent != null) {
+                    File selectedFile = srchDirectory((String) NodoSeleccionado.getUserObject(), root);
+
+                    if (selectedFile != null) {
+                        File nuevoArchivo = new File(selectedFile.getParentFile(), nuevoNombre);
+                        if (selectedFile.renameTo(nuevoArchivo)) {
+                            NodoSeleccionado.setUserObject(nuevoNombre);
+                            modelo.nodeChanged(NodoSeleccionado);
+                        } else {
+                            JOptionPane.showMessageDialog(Frame.this, "Error: No se pudo cambiar el nombre", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
                     }
                 }
+            }
         }
-    }
     }//GEN-LAST:event_ModificarNodoBTNActionPerformed
 
     private void NombreNodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NombreNodoActionPerformed
